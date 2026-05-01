@@ -1,240 +1,392 @@
-# RUNTIME_PLAN.md
+# RUNTIME_DESCRIPTION.md
 
-## Initialization
+## System Definition
 
-Initial state S^0 must satisfy:
+Deterministic runtime for the LILYCODE / EXISTON system.
 
-- length = n  
-- values ∈ {+1, 0, -1}  
+A discrete, step-indexed dynamical system over 28 nodes. Each node holds a value in {−1,0,+1}. The system evolves deterministically from an initial state S^0 using a fixed interaction structure G.
 
-Optional:
+At each step, a candidate state is computed, resolved, and verified. A next state exists if and only if it passes verification.
 
-- derived from fixed seed  
-
-Rule:
-
-Same seed → identical S^0
+All functions are pure (no side effects). The system is closed. No randomness, external input, or hidden state exists.
 
 ---
 
-## Topology Invariant
+## 1. Domains
 
-- Topology is immutable  
-- Neighbor mapping must not change  
+ℕ := {0,1,2,...}
 
-Rule:
+Nodes := {0,1,...,27}
 
-Topology hash must remain constant across execution
+|Nodes| = 28
 
----
+Value := {−1,0,+1}
 
-## Transition Function
+X := Value^{28}
 
-step(S^k) → S^(k+1)_candidate
-
-For each node i:
-
-1. Read neighbors N(i)
-
-2. Count:
-   - plus (+1)
-   - zero (0)
-   - minus (-1)
-
-3. Apply rule:
-
-- if plus > zero AND plus > minus → +1  
-- if minus > plus AND minus > zero → -1  
-- otherwise → 0  
+max_degree := 6
 
 ---
 
-## Execution Order
+## 2. Representation
 
-- Nodes processed in fixed index order (0 → n-1)  
-- Order must never change  
+S^k : Nodes → Value  
+S^k ∈ X  
 
----
+Index mapping:
 
-## Step Execution
-
-Rules:
-
-- No mutation of S^k  
-- Compute full S^(k+1)_candidate first  
-- Replace state atomically  
+∀i ∈ Nodes, index i corresponds to vector position i
 
 ---
 
-## Validation Gate
+## 3. Notation
 
-validate(S^k, S^(k+1)_candidate) → boolean
+S^k[i] ∈ Value  
 
-Must check:
+|A| = cardinality  
 
-### 1. Size Integrity
-- length(S^(k+1)) == length(S^k)
+Equality:
 
-### 2. Domain Integrity
-- all values ∈ {+1, 0, -1}
+S = T ⇔ ∀i, S[i] = T[i]
 
-### 3. Rule Integrity
-- recompute step(S^k)  
-- result must match candidate exactly  
+Logical symbols:
 
-### 4. Topology Integrity
-- neighbor structure unchanged  
+∈, ⊆, ⇔, ∧, ∨, ¬, ∀, ∃, ∃!
 
 ---
 
-## Execution Loop
+## 4. Sequence
 
-for k = 1 → N:
+k ∈ ℕ  
 
-1. candidate = step(S^k)
+Execution begins at k = 0  
 
-2. if validate(S^k, candidate) == false → STOP
-
-3. log(candidate)
-
-4. S^(k+1) = candidate
+(S^k)_{k=0}^{T}, T ∈ ℕ ∪ {∞}
 
 ---
 
-## Logging
+## 5. Initial State
 
-Log only validated states.
+S^0 ∈ X  
 
-Structure:
-
-(k, node, state, valid=1)
-
-Rules:
-
-- Append-only  
-- No raw state logs  
-- No invalid entries  
+S^0 exists without validation  
 
 ---
 
-## Deduplication
+## 6. Topology
 
-Each entry must be unique:
+G : Nodes → 2^{Nodes}
 
-Key = (k, node)
+G is fixed before execution:
 
-If duplicate detected:
+∀k, G^k = G
 
-- throw error  
-- halt or reject write  
+Define:
 
----
-
-## Replay System
-
-replay(S^0, steps)
-
-Process:
-
-1. Start from S^0  
-2. Recompute each step  
-3. Compare with stored results  
-
-Rule:
-
-Replay must match exactly  
+N(i) := G(i)
 
 ---
 
-## Failure Handling
+## 6.1 Canonical Construction
 
-If validation fails:
+Nodes arranged cyclically modulo 28.
 
-- STRICT MODE → halt execution immediately  
-- SAFE MODE → revert to S^k  
+For each i:
 
-Rules:
-
-- No silent correction  
-- No partial acceptance  
-
----
-
-## Determinism Enforcement
-
-System must guarantee:
-
-- No Math.random()  
-- No time-based functions  
-- No async scheduling  
-- No concurrency  
-- No external inputs  
+N(i) := {
+    (i−1) mod 28,
+    (i+1) mod 28,
+    (i−2) mod 28,
+    (i+2) mod 28
+}
 
 ---
 
-## Concurrency Constraints
+## 6.2 Constraints
 
-- Single-threaded execution  
-- No shared mutable state  
-- Immutable state per step  
+∀i:
 
----
+- N(i) ⊆ Nodes  
+- i ∉ N(i)  
+- |N(i)| ≤ max_degree  
 
-## Runtime Boundary
+Symmetry:
 
-Core runtime includes:
+∀i,j:
 
-- step()  
-- validate()  
-- run()  
-- replay()  
-
-Must be:
-
-- pure  
-- no side effects  
-- no external dependencies  
+j ∈ N(i) ⇔ i ∈ N(j)
 
 ---
 
-## Outputs
+## 6.3 Generalization
 
-System produces:
+Any G′ is valid if it satisfies all constraints.
 
-- final state S^k  
-- full existon log  
-- validation status  
+System correctness is invariant under all valid G.
 
 ---
 
-## Verification Requirements
+## 7. Transition Function
 
-Must pass:
+step : (X, G) → X
 
-1. Same seed → identical output  
-2. Invalid step → rejected  
-3. Replay == execution  
-4. No duplicate logs  
-5. Topology hash constant  
+Total:
+
+∀S ∈ X, step(S,G) ∈ X
+
+Synchronous:
+
+All node updates are computed from S simultaneously.
+
+Definition:
+
+For S ∈ X and i ∈ Nodes:
+
+If N(i) = ∅:
+
+    step(S,G)[i] = 0
+
+Else:
+
+    plus  = |{ j ∈ N(i) : S[j] = +1 }|  
+    zero  = |{ j ∈ N(i) : S[j] = 0 }|  
+    minus = |{ j ∈ N(i) : S[j] = −1 }|  
+
+    step(S,G)[i] =
+        +1 if plus > max(zero, minus)
+        −1 if minus > max(plus, zero)
+         0 otherwise
+
+Tie definition:
+
+0 otherwise ⇔ no value is strictly greater than both others
 
 ---
 
-## Non-Goals
+## 8. Resolver
 
-Do NOT include:
+R : (X, X) → X
 
-- UI  
-- React  
-- APIs  
-- External integrations  
-- Visualization  
+Total:
+
+∀S_candidate, S ∈ X, R(S_candidate,S) ∈ X
+
+Definition:
+
+S_next := R(S_candidate, S)
+
+For each i:
+
+    S_next[i] =
+        S_candidate[i] if S_candidate[i] ≠ 0
+        S[i]           if S_candidate[i] = 0
 
 ---
 
-## Rule
+## 9. Validation
 
-Do NOT implement runtime until:
+validate : (X, X) → {true,false}
 
-- determinism is proven in plan  
-- validation rules are fully defined  
-- replay guarantees are clear
+Total:
+
+∀S_candidate, S_next ∈ X
+
+Definition:
+
+validate(S_candidate, S_next) = true ⇔
+
+∀i:
+
+    if S_candidate[i] ≠ 0 then
+        S_next[i] = S_candidate[i]
+
+Validation is logically redundant under correct implementation of R, but retained as a verification layer.
+
+---
+
+## 10. Evolution Operator
+
+Φ : (X, G) → X
+
+Definition:
+
+Φ(S, G, S_candidate) := R(S_candidate, S)
+
+Execution uses precomputed S_candidate and does not recompute step.
+
+Φ produces candidate state only.
+
+---
+
+## 11. Execution
+
+Given S^k:
+
+S_candidate := step(S^k, G)  
+S_next := R(S_candidate, S^k)  
+
+valid := validate(S_candidate, S_next)
+
+If valid:
+
+    S^(k+1) = S_next
+
+Else:
+
+    execution halts at k
+
+---
+
+## 12. Existence
+
+S^0 exists  
+
+∀k:
+
+S^(k+1) exists ⇔ valid = true
+
+---
+
+## 13. Determinism
+
+∀S^0 ∈ X:
+
+∃! sequence (S^k)
+
+---
+
+## 14. Existon
+
+Ξ_i^k := (k, i, S^k[i])
+
+---
+
+## 15. Logging
+
+L := ordered sequence of Ξ_i^k
+
+Completeness:
+
+L contains exactly all Ξ_i^k for all existing states
+
+Ordering:
+
+- primary: ascending k  
+- secondary: ascending i  
+
+Uniqueness:
+
+∀(k,i) appears exactly once
+
+Logging occurs immediately after state creation
+
+---
+
+## 16. Replay
+
+Replay(S^0, k) recomputes S^k deterministically
+
+---
+
+## 17. Termination
+
+Execution terminates if:
+
+1. valid = false  
+2. S_next = S^k  
+
+Validation failure takes precedence
+
+---
+
+## 18. Fixed Point
+
+S_next = S^k ⇔ stable state
+
+---
+
+## 19. Cycles
+
+A cycle of period p exists if:
+
+∃k, p > 0 such that S^k = S^(k+p)
+
+Since X is finite, execution must eventually reach a fixed point or a cycle.
+
+---
+
+## 20. Immutability
+
+∀k:
+
+S^k is immutable once defined
+
+---
+
+## 21. No Hidden State
+
+S_next = Φ(S^k, G, S_candidate)
+
+¬∃U such that Φ depends on U
+
+---
+
+## 22. Computational Bound
+
+Each step requires O(|Nodes| · max_degree) operations
+
+---
+
+## 23. Function Purity
+
+All functions (step, R, validate, Φ) are pure
+
+Outputs depend only on inputs
+
+---
+
+# =========================
+# AGENT LAYERS
+# =========================
+
+## Core Runtime
+
+A_transition(S,G) := step(S,G)  
+A_resolver(S_candidate,S) := R(S_candidate,S)  
+A_validate(S_candidate,S_next) := validate(S_candidate,S_next)  
+
+Execution:
+
+S^k → transition → resolver → validate → commit → log  
+
+---
+
+## Agent Separation
+
+Agents are not inputs to Φ:
+
+Φ depends only on (S, G, S_candidate)
+
+---
+
+## Placeholder Agents
+
+A_j : X → Output_j  
+
+No effect on state  
+
+---
+
+## External Agents
+
+Operate outside runtime  
+
+No influence on execution  
+
+---
+
+## Separation Principle
+
+The runtime is closed and isolated.
+
+External systems cannot affect state evolution.
