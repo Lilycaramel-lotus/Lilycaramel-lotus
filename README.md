@@ -6,19 +6,17 @@ Deterministic causal engine with validation-first execution.
 
 ## Extended Description
 
-LILYCODE is a deterministic causal execution system designed to eliminate ambiguity, randomness, and uncontrolled state evolution.
+LILYCODE is a deterministic execution system designed to produce consistent, repeatable outcomes from a fixed starting state.
 
-The system operates strictly on discrete steps (k), where each state transition is derived solely from the previous validated state. No timing, asynchronous behavior, or probabilistic input is allowed. This ensures that identical initial conditions always produce identical outcomes.
+The system progresses in discrete steps (k). At each step, the next state is derived only from the previous validated state. There is no randomness, no asynchronous behavior, and no external influence on execution.
 
-EXISTON (Ξ) defines the canonical unit of existence within the system. A state is considered real only after it has passed validation. Any unvalidated or invalid state is treated as non-existent and is never stored, propagated, or logged.
+EXISTON (Ξ) represents a validated state. A state only becomes part of the system once it has passed validation. Any invalid or unverified state is rejected and treated as non-existent.
 
-The system enforces a constrained state space of {+1, 0, -1} and operates over a fixed topology (target: 28-node hex graph). All updates occur synchronously and atomically. There are no partial updates, no side effects, and no external mutation of system state.
+The system operates within a constrained state space {+1, 0, -1} and a fixed node topology. All updates occur synchronously, and the full system state is replaced at each step.
 
-Validation is the critical control point. Every transition must be recomputable and verifiable. If validation fails, the system halts or reverts. No silent corrections are permitted.
+The goal of this architecture is reproducibility. Given the same starting conditions, the system must always produce the same sequence of states.
 
-This architecture is designed to produce a fully reproducible execution model. Given the same seed and topology, the system must produce identical outputs, step-by-step, without deviation.
-
-The repository currently defines the formal specification only. No runtime implementation exists yet. The next phase is to construct a minimal deterministic runtime that enforces the transition rules, validation gate, and execution constraints defined in the specification.
+This repository currently defines the system at a specification level only. The runtime implementation has not yet been built.
 
 ---
 
@@ -101,35 +99,4 @@ This file is the canonical source of truth.
 - Specification defined  
 - No runtime implemented  
 - Determinism not yet proven  
-- Validation not yet enforced  
-- System not production-safe  
-
----
-
-## Build Rule
-
-Do NOT build:
-
-- UI  
-- APIs  
-- Integrations  
-- Agents  
-
-Until the following are proven:
-
-- deterministic execution  
-- validation gate enforced  
-- replay matches execution exactly  
-
----
-
-## Next Step
-
-Implement minimal deterministic runtime:
-
-- fixed seed  
-- pure step()  
-- deterministic loop  
-- validation gate  
-
-Nothing else.
+- Validation
