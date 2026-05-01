@@ -12,22 +12,6 @@ Project: LILYCODE / EXISTON
 
 ---
 
-## Extended Description
-
-LILYCODE is a deterministic execution system designed to produce consistent, repeatable outcomes from a fixed starting state.
-
-The system progresses in discrete steps (k). Each step is computed only from the previous validated state. There is no randomness, no asynchronous behavior, and no external influence on execution.
-
-EXISTON (Ξ) defines the unit of validated existence. A state exists only after it has passed validation. Any invalid or unverified state is rejected and treated as non-existent.
-
-The system operates within a constrained state space {+1, 0, -1} and a fixed node topology (target: 28 nodes). All updates are synchronous. The entire system state is replaced at each step.
-
-The goal is strict reproducibility. Given the same initial state, the system must always produce the same sequence of states without deviation.
-
-This repository currently defines the system at a specification level only. The runtime implementation has not yet been built.
-
----
-
 ## System Definition
 
 LILYCODE defines a step-based execution model where system state is strictly derived, validated, and immutable once accepted.
