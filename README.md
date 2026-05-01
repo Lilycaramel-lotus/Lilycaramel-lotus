@@ -4,6 +4,24 @@ Deterministic causal engine with validation-first execution.
 
 ---
 
+## Extended Description
+
+LILYCODE is a deterministic causal execution system designed to eliminate ambiguity, randomness, and uncontrolled state evolution.
+
+The system operates strictly on discrete steps (k), where each state transition is derived solely from the previous validated state. No timing, asynchronous behavior, or probabilistic input is allowed. This ensures that identical initial conditions always produce identical outcomes.
+
+EXISTON (Ξ) defines the canonical unit of existence within the system. A state is considered real only after it has passed validation. Any unvalidated or invalid state is treated as non-existent and is never stored, propagated, or logged.
+
+The system enforces a constrained state space of {+1, 0, -1} and operates over a fixed topology (target: 28-node hex graph). All updates occur synchronously and atomically. There are no partial updates, no side effects, and no external mutation of system state.
+
+Validation is the critical control point. Every transition must be recomputable and verifiable. If validation fails, the system halts or reverts. No silent corrections are permitted.
+
+This architecture is designed to produce a fully reproducible execution model. Given the same seed and topology, the system must produce identical outputs, step-by-step, without deviation.
+
+The repository currently defines the formal specification only. No runtime implementation exists yet. The next phase is to construct a minimal deterministic runtime that enforces the transition rules, validation gate, and execution constraints defined in the specification.
+
+---
+
 ## System Definition
 
 LILYCODE defines a step-based execution model where system state is strictly derived, validated, and immutable once accepted.
@@ -115,18 +133,3 @@ Implement minimal deterministic runtime:
 - validation gate  
 
 Nothing else.
-
-<!--
-**Lilycaramel-lotus/Lilycaramel-lotus** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
-
-Here are some ideas to get you started:
-
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
