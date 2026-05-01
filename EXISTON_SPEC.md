@@ -1,44 +1,4 @@
-# Ξ SYSTEM — EXISTON SPEC (FINAL)
-
-## Identity
-
-- Step (k) → discrete index
-- Existon (Ξ) → validated existence unit
-
----
-
-## Core Model
-
-k ∈ ℕ
-
-Ξ_i^k = (k, i, s, v)
-
-s ∈ {+1, 0, -1}  
-v = 1
-
----
-
-## Axiom
-
-No Ξ → no history → no system reality
-
----
-
-## Agent System
-
-Agents = nodes
-
-States:
-+1 = approve  
-0  = neutral  
--1 = reject  
-
----
-
-## Vote Reduction
-
-sum = Σ(s_i)
-
+Implement validateNext() and enforce it in run().
 if sum > 0 → +1  
 if sum < 0 → -1  
 if sum = 0 → 0  
