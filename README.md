@@ -4,17 +4,25 @@ Deterministic causal engine with validation-first execution.
 
 ---
 
+## Identity
+
+GitHub: Lilycaramel-lotus  
+Repository: Lilycaramel-lotus  
+Project: LILYCODE / EXISTON  
+
+---
+
 ## Extended Description
 
 LILYCODE is a deterministic execution system designed to produce consistent, repeatable outcomes from a fixed starting state.
 
-The system progresses in discrete steps (k). At each step, the next state is derived only from the previous validated state. There is no randomness, no asynchronous behavior, and no external influence on execution.
+The system progresses in discrete steps (k). Each step is computed only from the previous validated state. There is no randomness, no asynchronous behavior, and no external influence on execution.
 
-EXISTON (Ξ) represents a validated state. A state only becomes part of the system once it has passed validation. Any invalid or unverified state is rejected and treated as non-existent.
+EXISTON (Ξ) defines the unit of validated existence. A state exists only after it has passed validation. Any invalid or unverified state is rejected and treated as non-existent.
 
-The system operates within a constrained state space {+1, 0, -1} and a fixed node topology. All updates occur synchronously, and the full system state is replaced at each step.
+The system operates within a constrained state space {+1, 0, -1} and a fixed node topology (target: 28 nodes). All updates are synchronous. The entire system state is replaced at each step.
 
-The goal of this architecture is reproducibility. Given the same starting conditions, the system must always produce the same sequence of states.
+The goal is strict reproducibility. Given the same initial state, the system must always produce the same sequence of states without deviation.
 
 This repository currently defines the system at a specification level only. The runtime implementation has not yet been built.
 
@@ -35,7 +43,7 @@ EXISTON (Ξ) is the canonical unit of validated existence.
 - k → discrete step index  
 - i → node identifier  
 - s ∈ {+1, 0, -1}  
-- v = 1 (validated only)  
+- v = 1 (validated only)
 
 Rule:
 
@@ -99,4 +107,35 @@ This file is the canonical source of truth.
 - Specification defined  
 - No runtime implemented  
 - Determinism not yet proven  
-- Validation
+- Validation not yet enforced  
+- System not production-safe  
+
+---
+
+## Build Rule
+
+Do NOT build:
+
+- UI  
+- APIs  
+- Integrations  
+- Agents  
+
+Until the following are proven:
+
+- deterministic execution  
+- validation gate enforced  
+- replay matches execution exactly  
+
+---
+
+## Next Step
+
+Implement minimal deterministic runtime:
+
+- fixed seed  
+- pure step()  
+- deterministic loop  
+- validation gate  
+
+Nothing else.
