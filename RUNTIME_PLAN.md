@@ -1,101 +1,30 @@
-# RUNTIME PLAN — LILYCODE / EXISTON (CANONICAL)
-
-## Status
-
-- No runtime implemented
-- Specification defined
-- System not yet deterministic in code
-- System not yet validated in execution
-
----
-
-## Purpose
-
-Define the exact execution model for LILYCODE.
-
-This file translates the specification into enforceable runtime behavior.
-
-No UI. No integrations. Core only.
-
----
-
-## Core Principle
-
-Execution is strictly deterministic.
-
-Same input → same output  
-Always.
-
-No randomness  
-No async behavior  
-No external input  
-
----
-
-## State Definition
-
-State S^k is an array:
-
-S^k = [s_0, s_1, ..., s_n]
-
-Where:
-
-- n = number of nodes (target: 28)
-- s ∈ {+1, 0, -1}
-
-Rules:
-
-- Fixed length
-- No null values
-- No extended domain
-
----
-
-## Step Index
-
-k ∈ ℕ
-
-Rules:
-
-- k starts at 0 or 1
-- k_next = k_prev + 1
-- No skipped steps
-- No duplicated steps
-
----
-
-## Topology
-
-- Fixed hexagonal graph
-- Nodes indexed 0 → n-1
-- Each node has predefined neighbors
-
-Rules:
-
-- Topology is built once
-- Topology is immutable
-- Neighbor mapping must not change
-
-### Topology Invariant
-
-A hash of the topology must remain constant across execution.
-
----
+# RUNTIME_PLAN.md
 
 ## Initialization
 
 Initial state S^0 must satisfy:
 
-- length = n
-- values ∈ {+1, 0, -1}
+- length = n  
+- values ∈ {+1, 0, -1}  
 
 Optional:
 
-- derived from fixed seed
+- derived from fixed seed  
 
 Rule:
 
 Same seed → identical S^0
+
+---
+
+## Topology Invariant
+
+- Topology is immutable  
+- Neighbor mapping must not change  
+
+Rule:
+
+Topology hash must remain constant across execution
 
 ---
 
@@ -106,6 +35,7 @@ step(S^k) → S^(k+1)_candidate
 For each node i:
 
 1. Read neighbors N(i)
+
 2. Count:
    - plus (+1)
    - zero (0)
@@ -121,8 +51,8 @@ For each node i:
 
 ## Execution Order
 
-- Nodes processed in fixed index order (0 → n-1)
-- Order must never change
+- Nodes processed in fixed index order (0 → n-1)  
+- Order must never change  
 
 ---
 
@@ -130,21 +60,9 @@ For each node i:
 
 Rules:
 
-- No mutation of S^k
-- Compute full S^(k+1)_candidate first
-- Replace state atomically
-
----
-
-## Determinism Enforcement
-
-System must guarantee:
-
-- No Math.random()
-- No time-based functions
-- No async scheduling
-- No concurrency
-- No external inputs
+- No mutation of S^k  
+- Compute full S^(k+1)_candidate first  
+- Replace state atomically  
 
 ---
 
@@ -155,47 +73,31 @@ validate(S^k, S^(k+1)_candidate) → boolean
 Must check:
 
 ### 1. Size Integrity
-
 - length(S^(k+1)) == length(S^k)
 
 ### 2. Domain Integrity
-
 - all values ∈ {+1, 0, -1}
 
 ### 3. Rule Integrity
-
-- recompute step(S^k)
-- result must match candidate exactly
+- recompute step(S^k)  
+- result must match candidate exactly  
 
 ### 4. Topology Integrity
-
-- neighbor structure unchanged
-
----
-
-## Existence Rule
-
-A state becomes real ONLY after validation.
-
-If invalid:
-
-- state does not exist
-- must not be logged
-- must not propagate
+- neighbor structure unchanged  
 
 ---
 
-## Failure Handling
+## Execution Loop
 
-If validation fails:
+for k = 1 → N:
 
-- STRICT MODE → halt execution immediately  
-- SAFE MODE → revert to S^k  
+1. candidate = step(S^k)
 
-Rules:
+2. if validate(S^k, candidate) == false → STOP
 
-- No silent correction
-- No partial acceptance
+3. log(candidate)
+
+4. S^(k+1) = candidate
 
 ---
 
@@ -209,9 +111,9 @@ Structure:
 
 Rules:
 
-- Append-only
-- No raw state logs
-- No invalid entries
+- Append-only  
+- No raw state logs  
+- No invalid entries  
 
 ---
 
@@ -223,8 +125,8 @@ Key = (k, node)
 
 If duplicate detected:
 
-- throw error
-- halt or reject write
+- throw error  
+- halt or reject write  
 
 ---
 
@@ -234,32 +136,47 @@ replay(S^0, steps)
 
 Process:
 
-1. Start from S^0
-2. Recompute each step
-3. Compare with stored results
+1. Start from S^0  
+2. Recompute each step  
+3. Compare with stored results  
 
 Rule:
 
-Replay must match exactly
+Replay must match exactly  
 
 ---
 
-## Execution Loop
+## Failure Handling
 
-for k = 1 → N:
+If validation fails:
 
-1. candidate = step(S^k)
-2. if validate(S^k, candidate) == false → STOP
-3. log(candidate)
-4. S^(k+1) = candidate
+- STRICT MODE → halt execution immediately  
+- SAFE MODE → revert to S^k  
+
+Rules:
+
+- No silent correction  
+- No partial acceptance  
+
+---
+
+## Determinism Enforcement
+
+System must guarantee:
+
+- No Math.random()  
+- No time-based functions  
+- No async scheduling  
+- No concurrency  
+- No external inputs  
 
 ---
 
 ## Concurrency Constraints
 
-- Single-threaded execution
-- No shared mutable state
-- Immutable state per step
+- Single-threaded execution  
+- No shared mutable state  
+- Immutable state per step  
 
 ---
 
@@ -267,16 +184,16 @@ for k = 1 → N:
 
 Core runtime includes:
 
-- step()
-- validate()
-- run()
-- replay()
+- step()  
+- validate()  
+- run()  
+- replay()  
 
 Must be:
 
-- pure
-- deterministic
-- isolated
+- pure  
+- no side effects  
+- no external dependencies  
 
 ---
 
@@ -284,9 +201,9 @@ Must be:
 
 System produces:
 
-- final state S^k
-- full existon log
-- validation status
+- final state S^k  
+- full existon log  
+- validation status  
 
 ---
 
@@ -294,11 +211,11 @@ System produces:
 
 Must pass:
 
-1. Same seed → identical output
-2. Invalid step → rejected
-3. Replay == execution
-4. No duplicate logs
-5. Topology hash constant
+1. Same seed → identical output  
+2. Invalid step → rejected  
+3. Replay == execution  
+4. No duplicate logs  
+5. Topology hash constant  
 
 ---
 
@@ -306,11 +223,11 @@ Must pass:
 
 Do NOT include:
 
-- UI
-- React
-- APIs
-- External integrations
-- Visualization
+- UI  
+- React  
+- APIs  
+- External integrations  
+- Visualization  
 
 ---
 
@@ -318,6 +235,6 @@ Do NOT include:
 
 Do NOT implement runtime until:
 
-- determinism is proven in plan
-- validation rules are fully defined
+- determinism is proven in plan  
+- validation rules are fully defined  
 - replay guarantees are clear
